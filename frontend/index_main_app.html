@@ -368,6 +368,7 @@ footer{position:relative;z-index:2;padding:3rem;border-top:1px solid var(--borde
     <div class="feat" onclick="showDisguise()"><div class="feat-ico">👁️</div><div class="feat-title" data-i18n="feat3_title">Disguise Mode</div><div class="feat-desc" data-i18n="feat3_desc">App opens as a calculator. Type 111 to enter SafeVoice. Disguise button returns to calculator instantly.</div><span class="feat-arrow">→</span></div>
     <div class="feat" onclick="openEvidenceVault()"><div class="feat-ico">🔐</div><div class="feat-title" data-i18n="feat4_title">Evidence Vault</div><div class="feat-desc" data-i18n="feat4_desc">Secretly capture photos, record audio, write notes. Attach evidence to chat for AI analysis. Device-only storage.</div><span class="feat-arrow">→</span></div>
     <div class="feat" onclick="openSafeExit()"><div class="feat-ico">🚪</div><div class="feat-title" data-i18n="feat5_title">Safe Exit Planner</div><div class="feat-desc" data-i18n="feat5_desc">Step-by-step personalised escape plan. Finds nearby police stations, hospitals, shelters using your location.</div><span class="feat-arrow">→</span></div>
+    <div class="feat" onclick="openFIRModal()"><div class="feat-ico">📋</div><div class="feat-title">File FIR Online</div><div class="feat-desc">File a First Information Report directly with Karnataka Police. Get case ID instantly. Track your complaint.</div><span class="feat-arrow">→</span></div>
     <div class="feat" onclick="triggerSOS()"><div class="feat-ico">🆘</div><div class="feat-title" data-i18n="feat6_title">SOS Emergency Alert</div><div class="feat-desc" data-i18n="feat6_desc">One tap triggers a loud alarm and shows all emergency numbers including your trusted contact.</div><span class="feat-arrow">→</span></div>
     <div class="feat" onclick="quickExit()"><div class="feat-ico">⚡</div><div class="feat-title" data-i18n="feat7_title">Quick Exit</div><div class="feat-desc" data-i18n="feat7_desc">One click redirects to Google instantly. Always visible in the nav.</div><span class="feat-arrow">→</span></div>
     <div class="feat" onclick="navTo('laws')"><div class="feat-ico">📜</div><div class="feat-title" data-i18n="feat8_title">Know Your Rights</div><div class="feat-desc" data-i18n="feat8_desc">Full details of every protective law — how to file, what relief you can get, step-by-step legal actions.</div><span class="feat-arrow">→</span></div>
@@ -491,6 +492,7 @@ footer{position:relative;z-index:2;padding:3rem;border-top:1px solid var(--borde
       <input type="text" class="chat-in" id="allyChatIn" placeholder="Describe your friend's situation..." onkeydown="if(event.key==='Enter')sendAllyMsg()">
       <button class="send-btn" onclick="sendAllyMsg()">➤</button>
     </div>
+    <button class="btn-primary" style="width:100%;margin-top:0.8rem;background:linear-gradient(135deg,#dc2626,#b91c1c);font-size:0.85rem;padding:0.6rem" onclick="openFIRModal()">📋 File FIR Online</button>
     <p style="font-size:0.62rem;color:var(--white-dim);opacity:0.45;text-align:center;margin-top:0.5rem">CONFIDENTIAL AI ASSISTANT · ALWAYS VERIFY LEGAL ADVICE WITH A PROFESSIONAL</p>
   </div>
 </div>
@@ -565,6 +567,7 @@ footer{position:relative;z-index:2;padding:3rem;border-top:1px solid var(--borde
       <input type="text" class="chat-in" id="exitChatIn" placeholder="Type your situation here..." onkeydown="if(event.key==='Enter')sendExitMsg()">
       <button class="send-btn" onclick="sendExitMsg()">➤</button>
     </div>
+    <button class="btn-primary" style="width:100%;margin-top:0.8rem;background:linear-gradient(135deg,#dc2626,#b91c1c);font-size:0.85rem;padding:0.6rem" onclick="openFIRModal()">📋 File FIR Online</button>
     <p style="font-size:0.62rem;color:var(--white-dim);opacity:0.45;text-align:center;margin-top:0.5rem">CONFIDENTIAL AI ASSISTANT · NO ACCOUNT REQUIRED</p>
   </div>
 </div>
@@ -580,6 +583,56 @@ footer{position:relative;z-index:2;padding:3rem;border-top:1px solid var(--borde
     <div class="modal-cta">
       <button class="btn-primary" style="font-size:0.85rem;padding:0.65rem 1.4rem" onclick="closeLawDetail();navTo('chatbot');setTimeout(()=>{document.getElementById('chatIn').value='I need help with '+document.getElementById('lawDetailTitle').textContent;sendMsg();},600)">💬 Ask SafeVoice About This</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ FIR FILING MODAL ══ -->
+<div class="modal-overlay" id="firModal" onclick="if(event.target===this)closeFIRModal()">
+  <div class="modal-box" style="max-width:600px;padding:2rem">
+    <button class="modal-close" onclick="closeFIRModal()">✕</button>
+    <div class="modal-ico">📋</div>
+    <div class="modal-title">File FIR Online</div>
+    <div class="modal-subtitle" style="color:var(--red);margin-bottom:1.5rem">⚠️ This will create an official police complaint record</div>
+    
+    <label class="input-label">Your Full Name</label>
+    <input type="text" class="input-field" id="firName" placeholder="Enter your full name">
+    
+    <label class="input-label">Your Phone Number</label>
+    <input type="tel" class="input-field" id="firPhone" placeholder="10-digit mobile number">
+    
+    <label class="input-label">Your Address</label>
+    <textarea class="input-field" id="firAddress" rows="2" placeholder="Current address" style="resize:vertical"></textarea>
+    
+    <label class="input-label">Accused Person Details</label>
+    <input type="text" class="input-field" id="firAccused" placeholder="Name and relationship (e.g., husband, father-in-law)">
+    
+    <label class="input-label">Incident Details</label>
+    <textarea class="input-field" id="firIncident" rows="4" placeholder="Describe what happened - date, time, location, what they did..." style="resize:vertical"></textarea>
+    
+    <label class="input-label">Applicable Laws (Select all that apply)</label>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem">
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+        <input type="checkbox" id="firLaw498" value="IPC 498A" style="width:18px;height:18px">
+        <span style="font-size:0.85rem">IPC 498A - Cruelty by husband/relatives</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+        <input type="checkbox" id="firLawPWDVA" value="PWDVA 2005" style="width:18px;height:18px">
+        <span style="font-size:0.85rem">PWDVA 2005 - Domestic Violence</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+        <input type="checkbox" id="firLaw354" value="IPC 354" style="width:18px;height:18px">
+        <span style="font-size:0.85rem">IPC 354 - Assault on modesty</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+        <input type="checkbox" id="firLaw406" value="IPC 406" style="width:18px;height:18px">
+        <span style="font-size:0.85rem">IPC 406 - Streedhan/Property</span>
+      </label>
+    </div>
+    
+    <div id="firStatus" style="display:none;padding:1rem;border-radius:10px;margin-bottom:1rem;text-align:center"></div>
+    
+    <button class="btn-primary" style="width:100%;background:linear-gradient(135deg,#dc2626,#b91c1c);font-size:0.9rem;padding:0.75rem" onclick="submitFIR()">📋 Submit FIR</button>
+    <p style="font-size:0.7rem;color:var(--white-dim);opacity:0.6;text-align:center;margin-top:0.8rem">This will be sent to Karnataka Police. You will receive a case ID.</p>
   </div>
 </div>
 
@@ -1341,25 +1394,19 @@ async function sendMsg(){
   // Build user message, including attached docs
   let displayText=txt;
   let apiContent=txt;
-  let parts_override=null;
 
   if(attachedToChat.length>0){
-    // Build multipart message with text + evidence
-    const parts=[{text:txt+'\n\n[Evidence attached for analysis:]'}];
+    displayText=txt+' 📎 ['+attachedToChat.length+' evidence item(s) attached]';
+    apiContent=txt+'\n\n[Evidence attached for analysis:]';
     attachedToChat.forEach(item=>{
       if(item.type==='note'){
-        parts.push({text:'NOTE EVIDENCE: '+item.content});
+        apiContent+='\nNOTE EVIDENCE: '+item.content;
       } else if(item.type==='photo'){
-        // Extract base64
-        const base64=item.content.split(',')[1];
-        const mime=item.content.split(';')[0].split(':')[1]||'image/jpeg';
-        parts.push({inline_data:{mime_type:mime,data:base64}});
+        apiContent+='\nPHOTO EVIDENCE: [Image from '+item.date+']';
       } else if(item.type==='audio'){
-        parts.push({text:'AUDIO EVIDENCE: [Audio recording from '+item.date+']'});
+        apiContent+='\nAUDIO EVIDENCE: [Audio recording from '+item.date+']';
       }
     });
-    parts_override=parts;
-    displayText=txt+' 📎 ['+attachedToChat.length+' evidence item(s) attached]';
     // Clear attached after sending
     attachedToChat=[];
     renderAttachedDocs();
@@ -1370,9 +1417,22 @@ async function sendMsg(){
   showTyping();
 
   try{
-    const sys=SYS_CHAT[chatLang]||SYS_CHAT['en'];
-    let msgs=[...chatHistory.slice(-10)];
-    const reply=await callGemini(msgs,sys,parts_override);
+    // Call backend API instead of Gemini directly
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: apiContent,
+        language: chatLang,
+        history: chatHistory.slice(-10)
+      })
+    });
+    
+    if(!response.ok) throw new Error('API error');
+    
+    const data = await response.json();
+    const reply = data.reply;
+    
     hideTyping();
     addMsg(reply,'bot');
     chatHistory.push({role:'assistant',content:reply});
@@ -1600,7 +1660,22 @@ async function sendAllyMsg(){
   load.className='ally-bubble-bot';load.style.color='var(--purple-light)';load.textContent='...';
   document.getElementById('allyChat').appendChild(load);
   try{
-    const reply=await callGemini(allyHistory.slice(-10),SYS_ALLY[allyLang]||SYS_ALLY['en']);
+    // Call backend API for Ally Mode
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: msg + ' [Ally Mode: helping a friend]',
+        language: allyLang,
+        history: allyHistory.slice(-10)
+      })
+    });
+    
+    if(!response.ok) throw new Error('API error');
+    
+    const data = await response.json();
+    const reply = data.reply;
+    
     load.remove();_addAllyBubble(reply,'bot');
     allyHistory.push({role:'assistant',content:reply});
   }catch(e){load.remove();_addAllyBubble('📞 181 · 1091 · 100','bot');}
@@ -1678,10 +1753,27 @@ async function _runExitAI(){
   chat.appendChild(load);chat.scrollTop=99999;
   try{
     const msgs=[...exitHistory.slice(-8)];
+    let lastMsg = msgs[msgs.length-1].content;
     if(userLat&&userLng){
-      msgs[msgs.length-1]={...msgs[msgs.length-1],content:msgs[msgs.length-1].content+` (User location: ${userLat.toFixed(4)}, ${userLng.toFixed(4)} — suggest using the map buttons for nearby help)`};
+      lastMsg += ` (User location: ${userLat.toFixed(4)}, ${userLng.toFixed(4)} — suggest using the map buttons for nearby help)`;
     }
-    const reply=await callGemini(msgs,SYS_EXIT[exitLang]||SYS_EXIT['en']);
+    
+    // Call backend API for Safe Exit Planner
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: lastMsg + ' [Safe Exit Planner: creating escape plan]',
+        language: exitLang,
+        history: msgs.slice(0, -1)
+      })
+    });
+    
+    if(!response.ok) throw new Error('API error');
+    
+    const data = await response.json();
+    const reply = data.reply;
+    
     load.remove();
     _addExitBubble(reply,'bot',false);
     exitHistory.push({role:'assistant',content:reply});
@@ -1899,6 +1991,104 @@ function openLawDetail(key){
   document.getElementById('lawDetailModal').classList.add('open');
 }
 function closeLawDetail(){document.getElementById('lawDetailModal').classList.remove('open');}
+
+// ══════════════════════════════════════════
+// FIR FILING MODAL
+// ══════════════════════════════════════════
+function openFIRModal(){
+  document.getElementById('firModal').classList.add('open');
+}
+function closeFIRModal(){
+  document.getElementById('firModal').classList.remove('open');
+}
+
+async function submitFIR(){
+  const name = document.getElementById('firName').value.trim();
+  const phone = document.getElementById('firPhone').value.trim();
+  const address = document.getElementById('firAddress').value.trim();
+  const accused = document.getElementById('firAccused').value.trim();
+  const incident = document.getElementById('firIncident').value.trim();
+  
+  // Collect selected laws
+  const laws = [];
+  if(document.getElementById('firLaw498').checked) laws.push('IPC 498A');
+  if(document.getElementById('firLawPWDVA').checked) laws.push('PWDVA 2005');
+  if(document.getElementById('firLaw354').checked) laws.push('IPC 354');
+  if(document.getElementById('firLaw406').checked) laws.push('IPC 406');
+  
+  // Validation
+  if(!name || !phone || !address || !accused || !incident){
+    showToast('⚠️ Please fill all fields');
+    return;
+  }
+  
+  if(phone.length !== 10 || !/^\d+$/.test(phone)){
+    showToast('⚠️ Please enter valid 10-digit phone number');
+    return;
+  }
+  
+  if(laws.length === 0){
+    showToast('⚠️ Please select at least one applicable law');
+    return;
+  }
+  
+  const statusDiv = document.getElementById('firStatus');
+  statusDiv.style.display = 'block';
+  statusDiv.style.background = 'var(--white-faint)';
+  statusDiv.style.color = 'var(--white)';
+  statusDiv.textContent = '⏳ Submitting FIR...';
+  
+  try{
+    const response = await fetch('/api/fir/file', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        user_id: localStorage.getItem('userId') || 'anonymous',
+        complainant_name: name,
+        complainant_phone: phone,
+        complainant_address: address,
+        accused_details: accused,
+        incident_details: incident,
+        laws_invoked: laws.join(', ')
+      })
+    });
+    
+    if(!response.ok) throw new Error('Failed to file FIR');
+    
+    const data = await response.json();
+    
+    statusDiv.style.background = 'linear-gradient(135deg,#059669,#0d9488)';
+    statusDiv.innerHTML = `
+      <div style="font-size:1.1rem;margin-bottom:0.5rem">✅ FIR Filed Successfully</div>
+      <div style="font-size:0.9rem;font-weight:600">Case ID: ${data.case_id}</div>
+      <div style="font-size:0.75rem;margin-top:0.5rem;opacity:0.9">Save this Case ID for reference</div>
+    `;
+    
+    showToast('✅ FIR filed successfully! Case ID: ' + data.case_id);
+    
+    // Clear form after 3 seconds
+    setTimeout(() => {
+      document.getElementById('firName').value = '';
+      document.getElementById('firPhone').value = '';
+      document.getElementById('firAddress').value = '';
+      document.getElementById('firAccused').value = '';
+      document.getElementById('firIncident').value = '';
+      document.getElementById('firLaw498').checked = false;
+      document.getElementById('firLawPWDVA').checked = false;
+      document.getElementById('firLaw354').checked = false;
+      document.getElementById('firLaw406').checked = false;
+      statusDiv.style.display = 'none';
+    }, 3000);
+    
+  }catch(e){
+    statusDiv.style.background = 'linear-gradient(135deg,#dc2626,#b91c1c)';
+    statusDiv.innerHTML = `
+      <div style="font-size:0.95rem">❌ Failed to submit FIR</div>
+      <div style="font-size:0.75rem;margin-top:0.3rem">Please try again or call 100</div>
+    `;
+    showToast('❌ Failed to file FIR. Please try again.');
+  }
+}
 
 // ══════════════════════════════════════════
 // HEALTH CHECK

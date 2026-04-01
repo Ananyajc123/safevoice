@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeVoice - Login</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #1a0a3d, #06040f);
+  color: white;
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.container {
+  max-width: 500px;
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+}
+h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #c084fc, #e879f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle {
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 30px;
+  font-size: 0.9rem;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #c084fc;
+  font-weight: 500;
+}
+input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+input:focus {
+  border-color: #c084fc;
+}
+.camera-area {
+  margin: 20px 0;
+  text-align: center;
+}
+video, #preview {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+  margin: 10px 0;
+  display: none;
+}
+#preview {
+  display: none;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #7c3aed, #c084fc);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.message {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.success { background: rgba(74,222,128,0.2); border: 1px solid #4ade80; }
+.error { background: rgba(239,68,68,0.2); border: 1px solid #ef4444; }
+.info { background: rgba(192,132,252,0.2); border: 1px solid #c084fc; }
+.help {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 5px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>SafeVoice</h1>
+  <div class="subtitle">🔒 Secure Access for Women</div>
+  
+  <div id="message"></div>
+  
+  <form id="authForm">
+    <div class="form-group">
+      <label>🔑 Disguise Key</label>
+      <input type="password" id="key" placeholder="Enter your secret key" required minlength="4">
+      <div class="help">New user? Create a key. Returning? Enter your existing key.</div>
+    </div>
+    
+    <div class="camera-area">
+      <label>📸 Face Verification</label>
+      <video id="video" autoplay playsinline></video>
+      <img id="preview" alt="Captured photo">
+      <button type="button" id="cameraBtn" onclick="handleCamera()">📷 Start Camera</button>
+    </div>
+    
+    <button type="submit" id="submitBtn">🔐 Continue</button>
+  </form>
+  
+  <div style="text-align:center;margin-top:20px;font-size:0.8rem;color:rgba(255,255,255,0.4)">
+    🛡️ Your data is encrypted and stored locally
+  </div>
+</div>
+
+<canvas id="canvas" style="display:none"></canvas>
+
+<script>
+let stream = null;
+let photoData = null;
+let cameraStarted = false;
+
+function showMsg(text, type = 'info') {
+  const box = document.getElementById('message');
+  box.innerHTML = `<div class="message ${type}">${text}</div>`;
+}
+
+async function handleCamera() {
+  const video = document.getElementById('video');
+  const btn = document.getElementById('cameraBtn');
+  const preview = document.getElementById('preview');
+  
+  if (!cameraStarted) {
+    // Start camera
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user', width: 640, height: 480 } 
+      });
+      video.srcObject = stream;
+      video.style.display = 'block';
+      preview.style.display = 'none';
+      btn.textContent = '📸 Capture Photo';
+      cameraStarted = true;
+      showMsg('✅ Camera ready! Click "Capture Photo" when ready.', 'success');
+    } catch (err) {
+      showMsg('❌ Camera access denied. Please allow camera access.', 'error');
+      console.error('Camera error:', err);
+    }
+  } else {
+    // Capture photo
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    
+    photoData = canvas.toDataURL('image/jpeg', 0.8);
+    
+    // Show preview
+    preview.src = photoData;
+    preview.style.display = 'block';
+    video.style.display = 'none';
+    
+    // Stop camera
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    
+    btn.textContent = '🔄 Retake Photo';
+    cameraStarted = false;
+    showMsg('✅ Photo captured! Click "Continue" to proceed.', 'success');
+    
+    console.log('✅ Photo captured, data length:', photoData.length);
+  }
+}
+
+document.getElementById('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const key = document.getElementById('key').value.trim();
+  const btn = document.getElementById('submitBtn');
+  
+  console.log('🔍 Form submit - Key:', key, 'Photo:', photoData ? 'Yes' : 'No');
+  
+  if (key.length < 4) {
+    showMsg('⚠️ Disguise key must be at least 4 characters', 'error');
+    return;
+  }
+  
+  if (!photoData) {
+    showMsg('⚠️ Please capture your photo first', 'error');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = '🔄 Processing...';
+  
+  try {
+    // Check if user exists
+    console.log('📡 Checking if user exists...');
+    const checkRes = await fetch('/api/auth/check-existing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        disguise_key: key,
+        face_image: photoData
+      })
+    });
+    
+    const checkData = await checkRes.json();
+    console.log('✅ Check result:', checkData);
+    
+    if (checkData.exists) {
+      // LOGIN
+      console.log('👤 User exists, logging in...');
+      showMsg('✅ Account found! Logging you in...', 'info');
+      
+      const loginRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          disguise_key: key,
+          face_image: photoData
+        })
+      });
+      
+      const loginData = await loginRes.json();
+      console.log('✅ Login result:', loginData);
+      
+      if (loginData.success) {
+        localStorage.setItem('sv_user_id', loginData.user_id);
+        localStorage.setItem('sv_session', loginData.session_token);
+        showMsg('✅ Welcome back! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/app', 1500);
+      } else {
+        showMsg('❌ ' + loginData.message, 'error');
+        btn.disabled = false;
+        btn.textContent = '🔐 Continue';
+      }
+    } else {
+      // SIGNUP
+      console.log('✨ New user, signing up...');
+      showMsg('✨ Creating your account...', 'info');
+      
+      const signupRes = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          disguise_key: key,
+          face_image: photoData
+        })
+      });
+      
+      const signupData = await signupRes.json();
+      console.log('✅ Signup result:', signupData);
+      
+      if (signupData.success) {
+        localStorage.setItem('sv_user_id', signupData.user_id);
+        localStorage.setItem('sv_session', signupData.session_token);
+        showMsg('✅ Account created! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/app', 1500);
+      } else {
+        showMsg('❌ ' + signupData.message, 'error');
+        btn.disabled = false;
+        btn.textContent = '🔐 Continue';
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Error:', error);
+    showMsg('❌ Connection error: ' + error.message, 'error');
+    btn.disabled = false;
+    btn.textContent = '🔐 Continue';
+  }
+});
+
+// Auto-start camera
+window.addEventListener('load', () => {
+  console.log('✅ Page loaded');
+  
+  // Check if already logged in
+  const userId = localStorage.getItem('sv_user_id');
+  if (userId) {
+    console.log('👤 Already logged in, redirecting...');
+    showMsg('You are already logged in. Redirecting...', 'info');
+    setTimeout(() => window.location.href = '/app', 1000);
+  }
+});
+</script>
+
+</body>
+</html>
